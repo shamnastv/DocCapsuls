@@ -48,6 +48,7 @@ def train(args, model, optimizer, graphs):
     train_size = len(graphs)
     idx_train = np.random.permutation(train_size)
     loss_accum = 0
+    loss_accum_recon = 0
     for i in range(0, train_size, args.batch_size):
         selected_idx = idx_train[i:i + args.batch_size]
         batch_graph = [graphs[idx] for idx in selected_idx]
@@ -60,9 +61,10 @@ def train(args, model, optimizer, graphs):
         # labels.append(label.detach())
         # preds.append(pred.detach())
         loss_accum += loss.detach().cpu().item()
+        loss_accum_recon += reconstruction_loss.detach().cpu().item()
     # labels = torch.cat(labels)
     # preds = torch.cat(preds)
-    # print('loss', loss_accum)
+    print('loss recon', loss_accum_recon)
     return loss_accum
 
 
@@ -194,7 +196,7 @@ def main():
     parser.add_argument("--batch_size", type=int, default=32, help="batch_size")
     parser.add_argument("--iterations", type=int, default=3, help="number of iterations of dynamic routing")
     parser.add_argument("--seed", type=int, default=12345, help="Initial random seed")
-    parser.add_argument("--node_embedding_size", default=8, type=int,
+    parser.add_argument("--node_embedding_size", default=100, type=int,
                         help="Intended subgraph embedding size to be learnt")
     parser.add_argument("--graph_embedding_size", default=100, type=int,
                         help="Intended graph embedding size to be learnt")
