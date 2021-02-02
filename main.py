@@ -196,9 +196,9 @@ def main():
     parser.add_argument("--batch_size", type=int, default=32, help="batch_size")
     parser.add_argument("--iterations", type=int, default=3, help="number of iterations of dynamic routing")
     parser.add_argument("--seed", type=int, default=12345, help="Initial random seed")
-    parser.add_argument("--node_embedding_size", default=100, type=int,
+    parser.add_argument("--node_embedding_size", default=30, type=int,
                         help="Intended subgraph embedding size to be learnt")
-    parser.add_argument("--graph_embedding_size", default=100, type=int,
+    parser.add_argument("--graph_embedding_size", default=30, type=int,
                         help="Intended graph embedding size to be learnt")
     parser.add_argument("--num_gcn_channels", default=1, type=int,
                         help="Number of channels at each layer")
