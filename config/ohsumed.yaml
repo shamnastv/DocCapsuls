@@ -1,0 +1,7 @@
+dataset: ohsumed
+window_size_g: 20
+window_size: 5
+save_graph: False
+retrieve_graph: False
+embed_type: global_pmi
+pmi_c: 1
