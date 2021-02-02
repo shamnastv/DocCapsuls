@@ -49,6 +49,7 @@ def train(args, model, optimizer, graphs):
     idx_train = np.random.permutation(train_size)
     loss_accum = 0
     loss_accum_recon = 0
+    loss_accum_margin = 0
     for i in range(0, train_size, args.batch_size):
         selected_idx = idx_train[i:i + args.batch_size]
         batch_graph = [graphs[idx] for idx in selected_idx]
@@ -62,9 +63,10 @@ def train(args, model, optimizer, graphs):
         # preds.append(pred.detach())
         loss_accum += loss.detach().cpu().item()
         loss_accum_recon += reconstruction_loss.detach().cpu().item()
+        loss_accum_margin += margin_loss.detach().cpu().item()
     # labels = torch.cat(labels)
     # preds = torch.cat(preds)
-    print('loss recon', loss_accum_recon)
+    print('loss recon', loss_accum_recon, 'margin :', loss_accum_margin)
     return loss_accum
 
 
@@ -188,24 +190,17 @@ def create_gaph(args):
 
 def main():
     parser = argparse.ArgumentParser("GraphClassification")
-    parser.add_argument('--device', type=int, default=0,
-                        help='which gpu to use if any (default: 0)')
-    parser.add_argument('--configfile', type=str, default="mr",
-                        help='configuration file')
+    parser.add_argument('--device', type=int, default=0, help='which gpu to use if any (default: 0)')
+    parser.add_argument('--configfile', type=str, default="mr", help='configuration file')
     parser.add_argument("--epochs", type=int, default=3000, help="epochs")
     parser.add_argument("--batch_size", type=int, default=32, help="batch_size")
     parser.add_argument("--iterations", type=int, default=3, help="number of iterations of dynamic routing")
     parser.add_argument("--seed", type=int, default=12345, help="Initial random seed")
-    parser.add_argument("--node_embedding_size", default=30, type=int,
-                        help="Intended subgraph embedding size to be learnt")
-    parser.add_argument("--graph_embedding_size", default=30, type=int,
-                        help="Intended graph embedding size to be learnt")
-    parser.add_argument("--num_gcn_channels", default=1, type=int,
-                        help="Number of channels at each layer")
-    parser.add_argument("--num_gcn_layers", default=5, type=int,
-                        help="Number of GCN layers")
-    parser.add_argument("--lr", default=0.001, type=float,
-                        help="Learning rate to optimize the loss function")
+    parser.add_argument("--node_embedding_size", default=16, type=int,  help="subgraph embedding size to be learnt")
+    parser.add_argument("--graph_embedding_size", default=16, type=int, help="graph embedding size to be learnt")
+    parser.add_argument("--num_gcn_channels", default=3, type=int, help="Number of channels at each layer")
+    parser.add_argument("--num_gcn_layers", default=5, type=int, help="Number of GCN layers")
+    parser.add_argument("--lr", default=0.001, type=float, help="Learning rate to optimize the loss function")
     parser.add_argument("--decay_step", default=20000, type=float, help="Learning rate decay step")
     parser.add_argument("--lambda_val", default=0.5, type=float, help="Lambda factor for margin loss")
     parser.add_argument("--noise", default=0.3, type=float, help="dropout applied in input data")
@@ -214,7 +209,7 @@ def main():
     parser.add_argument("--coordinate", default=False, type=bool, help="If use Location record")
     parser.add_argument("--layer_depth", type=int, default=5, help="number of iterations of dynamic routing")
     parser.add_argument("--layer_width", type=int, default=2, help="number of iterations of dynamic routing")
-    parser.add_argument("--num_graph_capsules", type=int, default=16, help="number of iterations of dynamic routing")
+    parser.add_argument("--num_graph_capsules", type=int, default=64, help="number of iterations of dynamic routing")
     args = parser.parse_args()
 
     print(args)

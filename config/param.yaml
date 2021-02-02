@@ -1,7 +1,0 @@
-dataset: R52
-window_size_g: 20
-window_size: 20
-save_graph: True
-retrieve_graph: True
-embed_type: bert
-pmi_c: 4
