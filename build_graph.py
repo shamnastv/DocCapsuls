@@ -56,7 +56,6 @@ def build_graph(config='param'):
     if param['retrieve_graph']:
         return retrieve_graph('saved_graphs/data_' + config)
 
-    from bert_embedding import BertEmbedding
     import fasttext
 
     doc_name_list = []
@@ -156,6 +155,7 @@ def build_graph(config='param'):
         word_vectors = global_vocab_size
 
     elif param['embed_type'] == 'bert':
+        from bert_embedding import BertEmbedding
         # bert_embedding = BertEmbedding(model='bert_24_1024_16')
         print('start bert ', int(time.time() - s_t))
         bert_embedding = BertEmbedding()
