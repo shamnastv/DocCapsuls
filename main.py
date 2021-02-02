@@ -24,6 +24,7 @@ def get_dataset(batch_graph):
     labels = []
     masks = []
     reconstructs = []
+    positions = []
     for g in batch_graph:
         adj = g.adj
         num_nodes = adj.shape[0]
@@ -32,12 +33,13 @@ def get_dataset(batch_graph):
         adj_ls.append(adj_mat_temp)
         masks.append([1] * num_nodes + [0] * (max_node_num - num_nodes))
         feats.append(g.node_features + [0] * (max_node_num - num_nodes))
+        positions.append(g.positions + [[]] * (max_node_num - num_nodes))
         labels.append(g.label)
         reconstructs.append(g.recon)
 
     adj_ls = np.array(adj_ls)
 
-    return adj_ls, feats, labels, reconstructs, masks
+    return adj_ls, feats, labels, reconstructs, masks, positions
 
 
 def train(args, model, optimizer, graphs):
@@ -53,9 +55,9 @@ def train(args, model, optimizer, graphs):
     for i in range(0, train_size, args.batch_size):
         selected_idx = idx_train[i:i + args.batch_size]
         batch_graph = [graphs[idx] for idx in selected_idx]
-        adj_mats, feats, label, reconstructs, masks = get_dataset(batch_graph)
+        adj_mats, feats, label, reconstructs, masks, positions = get_dataset(batch_graph)
         class_capsule_output, loss, margin_loss, reconstruction_loss, label, pred = model(
-            adj_mats, feats, label, reconstructs, masks)
+            adj_mats, feats, label, reconstructs, masks, positions)
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
@@ -82,10 +84,10 @@ def test(args, model, graphs, split):
         if len(sampled_idx) == 0:
             continue
         batch_graph = [graphs[j] for j in sampled_idx]
-        adj_mats, feats, label, reconstructs, masks = get_dataset(batch_graph)
+        adj_mats, feats, label, reconstructs, masks, positions = get_dataset(batch_graph)
         with torch.no_grad():
             class_capsule_output, loss, margin_loss, reconstruction_loss, label, pred = model(
-                adj_mats, feats, label, reconstructs, masks)
+                adj_mats, feats, label, reconstructs, masks, positions)
         labels.append(label.detach().cpu())
         preds.append(pred.detach().cpu())
     labels = torch.cat(labels)
@@ -230,7 +232,7 @@ def main():
     val_graph = all_graphs[train_size:train_size+val_size]
     test_graph = all_graphs[train_size+val_size:]
 
-    model = Model(args, num_classes, word_vectors, len(word_vectors), device).to(device)
+    model = Model(args, num_classes, word_vectors, len(word_vectors), max_words, device).to(device)
     optimizer = optim.Adam(model.parameters(), args.lr)
     print(model)
 

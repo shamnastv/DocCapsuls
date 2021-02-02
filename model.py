@@ -24,7 +24,7 @@ def to_torch(adj, node_inputs, label, reconstructs, masks, device):
 
 
 class Model(nn.Module):
-    def __init__(self, args, num_classes, word_embeddings, recon_dim, device):
+    def __init__(self, args, num_classes, word_embeddings, recon_dim, max_words, device):
         super(Model, self).__init__()
 
         self.args = args
@@ -48,6 +48,17 @@ class Model(nn.Module):
         self._init_capsules(args)
         self._init_reconstruction_layers(args)
         self.dropout = nn.Dropout(.3)
+
+        self.positional_embeddings = np.zeros((max_words, self.gcn_input_dim))
+
+        for position in range(max_words):
+            for i in range(0, self.gcn_input_dim, 2):
+                self.positional_embeddings[position, i] = (
+                    np.sin(position / (10000 ** ((2 * i) / self.gcn_input_dim)))
+                )
+                self.positional_embeddings[position, i + 1] = (
+                    np.cos(position / (10000 ** ((2 * (i + 1)) / self.gcn_input_dim)))
+                )
 
     def _init_gcn(self, args):
         self.gcn_layers = nn.ModuleList()
@@ -73,18 +84,32 @@ class Model(nn.Module):
         # self.reconstruction_layer_2 = nn.Linear(int((self.gcn_input_dim * 2) / 3), int((self.gcn_input_dim * 3) / 2))
         self.reconstruction_layer_3 = nn.Linear(int((self.gcn_input_dim * 2) / 3), self.recon_dim)
 
-    def forward(self, adj_mats, feats, label, reconstructs, masks):
+    def get_pos_enc(self, positions_ls):
+        positions_tmp = []
+        for positions in positions_ls:
+            pos_enc = np.zeros((len(positions), self.gcn_input_dim))
+            for i in range(len(positions)):
+                for j in positions[i]:
+                    pos_enc[i] += self.positional_embeddings[j]
+                if len(positions[i]) > 0:
+                    pos_enc[i] = pos_enc[i] / len(positions[i])
+            pos_enc = torch.from_numpy(pos_enc).float()
+            positions_tmp.append(pos_enc)
+        return torch.stack(positions_tmp, dim=0)
+
+    def forward(self, adj_mats, feats, label, reconstructs, masks, positions):
         args = self.args
 
-        adj_norm, node_inputs, label, reconstructs, masks = to_torch(adj_mats, feats, label, reconstructs, masks, self.device)
-
+        adj_norm, node_inputs, label, reconstructs, masks = to_torch(adj_mats, feats, label,
+                                                                     reconstructs, masks, self.device)
+        positions = self.get_pos_enc(positions).to(self.device)
         # features = []
         # for i, att in enumerate(self.num_features):
         #     feat = self.embeddings[i](node_inputs[i])
         #     feat = self.dropout(feat)
         #     features.append(feat)
 
-        features = self.word_embeddings(node_inputs)
+        features = self.word_embeddings(node_inputs) + positions
         number_of_nodes = torch.sum(masks, dim=1, keepdim=True).float().unsqueeze(-1)
 
         b, n, _ = adj_norm.shape
