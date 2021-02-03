@@ -1,6 +1,6 @@
 dataset: 20ng
 window_size_g: 20
-window_size: 5
+window_size: 3
 save_graph: False
 retrieve_graph: False
 embed_type: global_pmi

@@ -7,3 +7,4 @@
 #SBATCH --partition=cl2_48h-1G
 
 python3 main.py --configfile ohsumed
+python3 main.py --configfile 20ng
