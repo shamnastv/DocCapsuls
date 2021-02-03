@@ -137,6 +137,7 @@ class Model(nn.Module):
         #     features.append(feat)
 
         features = self.word_embeddings(node_inputs) + positions
+        features = features * masks
         number_of_nodes = torch.sum(masks, dim=1, keepdim=True).float().unsqueeze(-1)
 
         b, n, _ = adj_norm.shape
@@ -144,7 +145,7 @@ class Model(nn.Module):
         hidden_representations = []
         for layer in self.gcn_layers:
             features = layer(adj_norm, features)
-            features = torch.tanh(features)
+            features = torch.tanh(features) * masks
             # features = self.dropout(features)
             hidden_representations.append(features.reshape(b, n, c, -1))
 
