@@ -15,37 +15,6 @@ from util import normalize_adj
 start_time = time.time()
 
 
-def get_dataset(batch_graph):
-    max_node_num = 0
-    for g in batch_graph:
-        max_node_num = max(max_node_num, g.adj.shape[0])
-    adj_ls = []
-    feats = []
-    labels = []
-    masks = []
-    reconstructs = []
-    positions = []
-    word_freq1 = []
-    word_freq2 = []
-    for g in batch_graph:
-        adj = g.adj
-        num_nodes = adj.shape[0]
-        adj_mat_temp = np.zeros((max_node_num, max_node_num))
-        adj_mat_temp[:num_nodes, :num_nodes] = adj
-        adj_ls.append(adj_mat_temp)
-        masks.append([1] * num_nodes + [0] * (max_node_num - num_nodes))
-        feats.append(g.node_features + [0] * (max_node_num - num_nodes))
-        positions.append(g.positions + [[]] * (max_node_num - num_nodes))
-        labels.append(g.label)
-        reconstructs.append(g.recon)
-        word_freq1.append(g.word_freq1 + [0] * (max_node_num - num_nodes))
-        word_freq2.append(g.word_freq2 + [0] * (max_node_num - num_nodes))
-
-    adj_ls = np.array(adj_ls)
-
-    return adj_ls, feats, labels, reconstructs, masks, positions, word_freq1, word_freq2
-
-
 def train(args, model, optimizer, graphs):
     model.train()
     # labels = []
@@ -59,9 +28,7 @@ def train(args, model, optimizer, graphs):
     for i in range(0, train_size, args.batch_size):
         selected_idx = idx_train[i:i + args.batch_size]
         batch_graph = [graphs[idx] for idx in selected_idx]
-        adj_mats, feats, label, reconstructs, masks, positions, word_freq1, word_freq2 = get_dataset(batch_graph)
-        class_capsule_output, loss, margin_loss, reconstruction_loss, label, pred = model(
-            adj_mats, feats, label, reconstructs, masks, positions, word_freq1, word_freq2)
+        class_capsule_output, loss, margin_loss, reconstruction_loss, label, pred = model(batch_graph)
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
@@ -88,10 +55,8 @@ def test(args, model, graphs, split):
         if len(sampled_idx) == 0:
             continue
         batch_graph = [graphs[j] for j in sampled_idx]
-        adj_mats, feats, label, reconstructs, masks, positions, word_freq1, word_freq2 = get_dataset(batch_graph)
         with torch.no_grad():
-            class_capsule_output, loss, margin_loss, reconstruction_loss, label, pred = model(
-                adj_mats, feats, label, reconstructs, masks, positions, word_freq1, word_freq2)
+            class_capsule_output, loss, margin_loss, reconstruction_loss, label, pred = model(batch_graph)
         labels.append(label.detach().cpu())
         preds.append(pred.detach().cpu())
     labels = torch.cat(labels)
@@ -216,6 +181,7 @@ def main():
     parser.add_argument("--layer_depth", type=int, default=5, help="number of iterations of dynamic routing")
     parser.add_argument("--layer_width", type=int, default=2, help="number of iterations of dynamic routing")
     parser.add_argument("--num_graph_capsules", type=int, default=64, help="number of iterations of dynamic routing")
+    parser.add_argument('--random_vec', action="store_true", help='random word embd')
     args = parser.parse_args()
 
     print(args)

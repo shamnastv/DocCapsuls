@@ -48,19 +48,6 @@ def get_dataset(batch_graph, device):
     return adj_ls, feats, labels, reconstructs, masks, positions, word_freq1, word_freq2
 
 
-def to_torch(adj, node_inputs, label, reconstructs, masks, device):
-    adj = torch.from_numpy(adj).float().to(device)
-    # tmp = []
-    # for a in node_inputs:
-    #     tmp.append(torch.tensor(a).long().to(device))
-
-    node_inputs = torch.tensor(node_inputs).long().to(device)
-    label = torch.tensor(label).long().to(device)
-    reconstructs = torch.tensor(reconstructs).float().to(device)
-    masks = torch.tensor(masks).long().to(device).unsqueeze(-1)
-    return adj, node_inputs, label, reconstructs, masks
-
-
 class Model(nn.Module):
     def __init__(self, args, num_classes, word_embeddings, recon_dim, max_words, device):
         super(Model, self).__init__()
@@ -81,7 +68,8 @@ class Model(nn.Module):
 
         self.gcn_input_dim = word_embeddings.shape[1]
 
-        self.attention = Attention(args.node_embedding_size * args.num_gcn_channels * args.num_gcn_layers)
+        self.attention = Attention(args.node_embedding_size * args.num_gcn_channels * args.num_gcn_layers + 2)
+        # self.attention = Attention(args.node_embedding_size * args.num_gcn_channels * args.num_gcn_layers)
         self._init_gcn(args)
         self._init_capsules(args)
         self._init_reconstruction_layers(args)
@@ -135,11 +123,12 @@ class Model(nn.Module):
             positions_tmp.append(pos_enc)
         return torch.stack(positions_tmp, dim=0)
 
-    def forward(self, adj_mats, feats, label, reconstructs, masks, positions, word_freq1, word_freq2):
+    def forward(self, batch_graph):
         args = self.args
 
-        adj_norm, node_inputs, label, reconstructs, masks = to_torch(adj_mats, feats, label,
-                                                                     reconstructs, masks, self.device)
+        adj_norm, node_inputs, label, reconstructs, masks, positions, word_freq1, word_freq2 = get_dataset(
+            batch_graph, self.device
+        )
         positions = self.get_pos_enc(positions).to(self.device)
         # features = []
         # for i, att in enumerate(self.num_features):
@@ -164,10 +153,8 @@ class Model(nn.Module):
         hidden_representations = torch.cat(hidden_representations, dim=2)  # b x n x c x d
         # hidden_representations = hidden_representations.view(1, self.args.gcn_layers, self.args.gcn_filters, -1)
 
-        # word_freq1 = torch.tensor(word_freq1).float().to(self.device).unsqueeze(-1)
-        # word_freq2 = torch.tensor(word_freq2).float().to(self.device).unsqueeze(-1)
-        # attn_input = torch.cat((hidden_representations.reshape(b, n, -1), word_freq1, word_freq2), dim=-1)
-        attn_input = hidden_representations.reshape(b, n, -1)
+        attn_input = torch.cat((hidden_representations.reshape(b, n, -1), word_freq1, word_freq2), dim=-1)
+        # attn_input = hidden_representations.reshape(b, n, -1)
         attn = self.attention(attn_input)
 
         attn = F.softmax(attn.masked_fill(masks.eq(0), -np.inf), dim=1).unsqueeze(-1)
@@ -185,8 +172,8 @@ class Model(nn.Module):
         class_capsule_output, a_j = self.class_capsule(graph_capsule_output, 1.0)
         class_capsule_output = class_capsule_output.squeeze()
 
-        loss, margin_loss, reconstruction_loss, pred = self.calculate_loss(args, class_capsule_output, label,
-                                                                           reconstructs)
+        loss, margin_loss, reconstruction_loss, pred = self.calculate_loss(args, class_capsule_output,
+                                                                           label, reconstructs)
         return class_capsule_output, loss, margin_loss, reconstruction_loss, label, pred
 
     def calculate_loss(self, args, capsule_input, target, reconstructs):
