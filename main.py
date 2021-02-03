@@ -163,7 +163,7 @@ def main():
     parser = argparse.ArgumentParser("GraphClassification")
     parser.add_argument('--device', type=int, default=0, help='which gpu to use if any (default: 0)')
     parser.add_argument('--configfile', type=str, default="mr", help='configuration file')
-    parser.add_argument("--epochs", type=int, default=3000, help="epochs")
+    parser.add_argument("--epochs", type=int, default=400, help="epochs")
     parser.add_argument("--batch_size", type=int, default=16, help="batch_size")
     parser.add_argument("--iterations", type=int, default=3, help="number of iterations of dynamic routing")
     parser.add_argument("--seed", type=int, default=0, help="Initial random seed")

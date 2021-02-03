@@ -479,9 +479,11 @@ def build_graph(config='param'):
             (weight, (row, col)), shape=(global_vocab_size, global_vocab_size))
         print('end global adj creation ', int(time.time() - s_t))
         print('start svd ', int(time.time() - s_t))
-        svd = TruncatedSVD(n_components=400, n_iter=7, random_state=42)
+        dim = 300
+        svd = TruncatedSVD(n_components=dim, n_iter=7, random_state=42)
         # word_vectors = adj_g + sp.identity(adj_g.shape[0])
         word_vectors = svd.fit_transform(adj_g)
+        word_vectors[0] = np.zeros(dim, dtype='float32')
         print('end svd ', int(time.time() - s_t))
 
     print('total docs : ', len(ls_adj))

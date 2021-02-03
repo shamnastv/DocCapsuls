@@ -62,7 +62,7 @@ class Model(nn.Module):
         # for i, d in enumerate(num_features):
         #     self.embeddings.append(nn.Embedding(d, args.node_embedding_size))
 
-        self.word_embeddings = nn.Embedding(word_embeddings.shape[0], word_embeddings.shape[1])
+        self.word_embeddings = nn.Embedding(word_embeddings.shape[0], word_embeddings.shape[1], padding_idx=0)
         self.word_embeddings.weight.data.copy_(word_embeddings)
         self.word_embeddings.weight.requires_grad = False
 
@@ -85,6 +85,7 @@ class Model(nn.Module):
                 self.positional_embeddings[position, i + 1] = (
                     np.cos(position / (10000 ** ((2 * (i + 1)) / self.gcn_input_dim)))
                 )
+        self.eps = nn.Parameter(torch.randn(1), requires_grad=True)
 
     def _init_gcn(self, args):
         self.gcn_layers = nn.ModuleList()
@@ -136,7 +137,7 @@ class Model(nn.Module):
         #     feat = self.dropout(feat)
         #     features.append(feat)
 
-        features = self.word_embeddings(node_inputs) + positions
+        features = self.word_embeddings(node_inputs) + self.eps * positions
         features = features * masks
         number_of_nodes = torch.sum(masks, dim=1, keepdim=True).float().unsqueeze(-1)
 

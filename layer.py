@@ -49,9 +49,8 @@ class SecondaryCapsuleLayer(nn.Module):
         n = input_shape[1]
 
         x = x.unsqueeze(3).repeat(1, 1, 1, self.out_channels, 1).unsqueeze(4)
-        W = self.W.repeat(batch_size, n, 1, 1, 1, 1)    # b x n x ci x co x di x do
-        # W = torch.cat([self.W] * batch_size, dim=0)
-        u_hat = torch.matmul(x, W).squeeze(4)  # b x n x ci x co x d
+        w = self.W.repeat(batch_size, n, 1, 1, 1, 1)    # b x n x ci x co x di x do
+        u_hat = torch.matmul(x, w).squeeze(4)  # b x n x ci x co x d
         u_hat = u_hat.reshape(batch_size, n * self.in_channels, self.out_channels, self.out_dim)   # b x n*ci x co x d
 
         b_ij = torch.zeros(batch_size, n * self.in_channels, self.out_channels, 1, device=self.device)  # b x n*ci x co x 1
@@ -63,7 +62,7 @@ class SecondaryCapsuleLayer(nn.Module):
             c_ij = F.softmax(b_ij, dim=1)
             # c_ij = torch.cat([c_ij] * batch_size, dim=0).unsqueeze(4)
             # print(number_of_nodes.shape)
-            s_j = (c_ij * u_hat).sum(dim=1, keepdim=True)   # b x 1 x co x d
+            s_j = (c_ij * u_hat).sum(dim=1, keepdim=True) / number_of_nodes   # b x 1 x co x d
             v_j, a_j = SecondaryCapsuleLayer.squash(s_j)  # b x 1 x co x d
 
             v_j1 = torch.cat([v_j] * n * self.in_channels, dim=1)  # b x n*ci x co x d

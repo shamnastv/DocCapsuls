@@ -7,3 +7,7 @@
 #SBATCH --partition=cl2_48h-1G
 
 python3 main.py --configfile R8
+python3 main.py --configfile R8_new
+
+python3 main.py --configfile R8 --batch_size 8 --num_gcn_channels 4
+python3 main.py --configfile R8_new --batch_size 8 --num_gcn_channels 4
