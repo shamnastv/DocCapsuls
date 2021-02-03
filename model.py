@@ -155,7 +155,7 @@ class Model(nn.Module):
         attn = self.attention(attn_input)
 
         attn = F.softmax(attn.masked_fill(masks.eq(0), -np.inf), dim=1).unsqueeze(-1)
-        hidden_representations = hidden_representations * attn  # b x n x c x d
+        hidden_representations = hidden_representations * attn * number_of_nodes  # b x n x c x d
 
         graph_capsule_output, a_j = self.graph_capsule(hidden_representations, number_of_nodes)
 
