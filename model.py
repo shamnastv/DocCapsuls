@@ -141,8 +141,6 @@ class Model(nn.Module):
 
         b, n, _ = adj_norm.shape
         c = args.num_gcn_channels
-        # edge_index = (adj > 0).nonzero().t()
-        # features = torch.cat(features, dim=-1)  # b x n x c*d
         hidden_representations = []
         for layer in self.gcn_layers:
             features = layer(adj_norm, features)
@@ -151,21 +149,13 @@ class Model(nn.Module):
             hidden_representations.append(features.reshape(b, n, c, -1))
 
         hidden_representations = torch.cat(hidden_representations, dim=2)  # b x n x c x d
-        # hidden_representations = hidden_representations.view(1, self.args.gcn_layers, self.args.gcn_filters, -1)
 
         attn_input = torch.cat((hidden_representations.reshape(b, n, -1), word_freq1, word_freq2), dim=-1)
         # attn_input = hidden_representations.reshape(b, n, -1)
         attn = self.attention(attn_input)
 
         attn = F.softmax(attn.masked_fill(masks.eq(0), -np.inf), dim=1).unsqueeze(-1)
-        hidden_representations = hidden_representations * attn * number_of_nodes  # b x n x c x d
-
-        # first_capsule_output = self.first_capsule(hidden_representations)
-        # first_capsule_output = first_capsule_output.view(-1, self.args.gcn_layers * self.args.capsule_dimensions)
-        #
-        # rescaled_capsule_output = self.attention(first_capsule_output)
-        # rescaled_first_capsule_output = rescaled_capsule_output.view(-1, self.args.gcn_layers,
-        #                                                              self.args.capsule_dimensions)
+        hidden_representations = hidden_representations * attn  # b x n x c x d
 
         graph_capsule_output, a_j = self.graph_capsule(hidden_representations, number_of_nodes)
 
