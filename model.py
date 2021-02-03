@@ -146,7 +146,7 @@ class Model(nn.Module):
         hidden_representations = []
         for layer in self.gcn_layers:
             features = layer(adj_norm, features)
-            features = torch.tanh(features) * masks
+            features = F.leaky_relu(features) * masks
             # features = self.dropout(features)
             hidden_representations.append(features.reshape(b, n, c, -1))
 
