@@ -78,8 +78,9 @@ class GCN(torch.nn.Module):
         super(GCN, self).__init__()
 
         self.linear1 = nn.Linear(input_dim, output_dim)
+        self.eps = nn.Parameter(torch.randn(1), requires_grad=True)
 
     def forward(self, adj, x):
         h = self.linear1(x)
-        h = torch.bmm(adj, h)
+        h = torch.bmm(adj, h) + self.eps * h
         return h
