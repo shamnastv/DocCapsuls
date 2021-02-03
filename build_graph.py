@@ -148,8 +148,11 @@ def build_graph(config='param'):
         # idf[word] = log(total_size / idf[word])
         idf[word] = log(total_size / (1 + idf[word])) + 1
 
-    global_vocab = list(global_word_set)
+    global_vocab = ['<pad>', '<unk>'] + list(global_word_set)
     global_vocab_size = len(global_vocab)
+
+    for i in range(global_vocab_size):
+        global_word_to_id[global_vocab[i]] = i
 
     if param['embed_type'] == 'identity':
         word_vectors = global_vocab_size
@@ -164,6 +167,7 @@ def build_graph(config='param'):
         for i in range(global_vocab_size):
             word_vectors.append(result_tmp[i][1][0])
         word_vectors = np.array(word_vectors)
+        word_vectors[0] = np.zeros(word_vectors.shape[1], dtype='float32')
         print('end bert ', int(time.time() - s_t))
 
     elif param['embed_type'] == 'fast':
@@ -175,7 +179,26 @@ def build_graph(config='param'):
             word_vectors.append(model.get_word_vector(global_vocab[i]))
         model = None
         word_vectors = np.array(word_vectors)
+        word_vectors[0] = np.zeros(word_vectors.shape[1], dtype='float32')
         print('end fast ', int(time.time() - s_t))
+
+    elif param['embed_type'] == 'glove':
+        filename = '../glove.840B.300d.txt'
+        dim = 300
+        count = 0
+        word_vectors = np.random.uniform(-0.25, 0.25, (len(global_word_to_id), dim))
+        with open(filename, encoding='utf-8') as fp:
+            for line in fp:
+                elements = line.strip().split()
+                word = elements[0]
+                if word in global_word_to_id:
+                    try:
+                        word_vectors[global_word_to_id[word]] = [float(v) for v in elements[1:]]
+                        count += 1
+                    except ValueError:
+                        pass
+        print('got embeddings of :', count)
+        word_vectors[0] = np.zeros(dim, dtype='float32')
 
     elif param['embed_type'] == 'global_pmi':
         word_vectors = None
@@ -183,9 +206,6 @@ def build_graph(config='param'):
     else:
         print('Invalid word embd type')
         sys.exit()
-
-    for i in range(global_vocab_size):
-        global_word_to_id[global_vocab[i]] = i
 
     print('start adj creation ', int(time.time() - s_t))
     feature_list = []

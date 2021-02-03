@@ -10,6 +10,44 @@ from util import normalize_adj
 epsilon = 1e-11
 
 
+def get_dataset(batch_graph, device):
+    max_node_num = 0
+    for g in batch_graph:
+        max_node_num = max(max_node_num, g.adj.shape[0])
+    adj_ls = []
+    feats = []
+    labels = []
+    masks = []
+    reconstructs = []
+    positions = []
+    word_freq1 = []
+    word_freq2 = []
+    for g in batch_graph:
+        adj = g.adj
+        num_nodes = adj.shape[0]
+        adj_mat_temp = np.zeros((max_node_num, max_node_num))
+        adj_mat_temp[:num_nodes, :num_nodes] = adj
+        adj_ls.append(adj_mat_temp)
+        masks.append([1] * num_nodes + [0] * (max_node_num - num_nodes))
+        feats.append(g.node_features + [0] * (max_node_num - num_nodes))
+        positions.append(g.positions + [[]] * (max_node_num - num_nodes))
+        labels.append(g.label)
+        reconstructs.append(g.recon)
+        word_freq1.append(g.word_freq1 + [0] * (max_node_num - num_nodes))
+        word_freq2.append(g.word_freq2 + [0] * (max_node_num - num_nodes))
+
+    adj_ls = np.array(adj_ls)
+    adj_ls = torch.from_numpy(adj_ls).float().to(device)
+    feats = torch.tensor(feats).long().to(device)
+    labels = torch.tensor(labels).long().to(device)
+    reconstructs = torch.tensor(reconstructs).float().to(device)
+    masks = torch.tensor(masks).long().to(device).unsqueeze(-1)
+    word_freq1 = torch.tensor(word_freq1).float().to(device).unsqueeze(-1)
+    word_freq2 = torch.tensor(word_freq2).float().to(device).unsqueeze(-1)
+
+    return adj_ls, feats, labels, reconstructs, masks, positions, word_freq1, word_freq2
+
+
 def to_torch(adj, node_inputs, label, reconstructs, masks, device):
     adj = torch.from_numpy(adj).float().to(device)
     # tmp = []
@@ -97,7 +135,7 @@ class Model(nn.Module):
             positions_tmp.append(pos_enc)
         return torch.stack(positions_tmp, dim=0)
 
-    def forward(self, adj_mats, feats, label, reconstructs, masks, positions):
+    def forward(self, adj_mats, feats, label, reconstructs, masks, positions, word_freq1, word_freq2):
         args = self.args
 
         adj_norm, node_inputs, label, reconstructs, masks = to_torch(adj_mats, feats, label,
@@ -126,7 +164,11 @@ class Model(nn.Module):
         hidden_representations = torch.cat(hidden_representations, dim=2)  # b x n x c x d
         # hidden_representations = hidden_representations.view(1, self.args.gcn_layers, self.args.gcn_filters, -1)
 
-        attn = self.attention(hidden_representations.reshape(b, n, -1))
+        # word_freq1 = torch.tensor(word_freq1).float().to(self.device).unsqueeze(-1)
+        # word_freq2 = torch.tensor(word_freq2).float().to(self.device).unsqueeze(-1)
+        # attn_input = torch.cat((hidden_representations.reshape(b, n, -1), word_freq1, word_freq2), dim=-1)
+        attn_input = hidden_representations.reshape(b, n, -1)
+        attn = self.attention(attn_input)
 
         attn = F.softmax(attn.masked_fill(masks.eq(0), -np.inf), dim=1).unsqueeze(-1)
         hidden_representations = hidden_representations * attn * number_of_nodes  # b x n x c x d

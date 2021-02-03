@@ -25,6 +25,8 @@ def get_dataset(batch_graph):
     masks = []
     reconstructs = []
     positions = []
+    word_freq1 = []
+    word_freq2 = []
     for g in batch_graph:
         adj = g.adj
         num_nodes = adj.shape[0]
@@ -36,10 +38,12 @@ def get_dataset(batch_graph):
         positions.append(g.positions + [[]] * (max_node_num - num_nodes))
         labels.append(g.label)
         reconstructs.append(g.recon)
+        word_freq1.append(g.word_freq1 + [0] * (max_node_num - num_nodes))
+        word_freq2.append(g.word_freq2 + [0] * (max_node_num - num_nodes))
 
     adj_ls = np.array(adj_ls)
 
-    return adj_ls, feats, labels, reconstructs, masks, positions
+    return adj_ls, feats, labels, reconstructs, masks, positions, word_freq1, word_freq2
 
 
 def train(args, model, optimizer, graphs):
@@ -55,9 +59,9 @@ def train(args, model, optimizer, graphs):
     for i in range(0, train_size, args.batch_size):
         selected_idx = idx_train[i:i + args.batch_size]
         batch_graph = [graphs[idx] for idx in selected_idx]
-        adj_mats, feats, label, reconstructs, masks, positions = get_dataset(batch_graph)
+        adj_mats, feats, label, reconstructs, masks, positions, word_freq1, word_freq2 = get_dataset(batch_graph)
         class_capsule_output, loss, margin_loss, reconstruction_loss, label, pred = model(
-            adj_mats, feats, label, reconstructs, masks, positions)
+            adj_mats, feats, label, reconstructs, masks, positions, word_freq1, word_freq2)
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
@@ -84,10 +88,10 @@ def test(args, model, graphs, split):
         if len(sampled_idx) == 0:
             continue
         batch_graph = [graphs[j] for j in sampled_idx]
-        adj_mats, feats, label, reconstructs, masks, positions = get_dataset(batch_graph)
+        adj_mats, feats, label, reconstructs, masks, positions, word_freq1, word_freq2 = get_dataset(batch_graph)
         with torch.no_grad():
             class_capsule_output, loss, margin_loss, reconstruction_loss, label, pred = model(
-                adj_mats, feats, label, reconstructs, masks, positions)
+                adj_mats, feats, label, reconstructs, masks, positions, word_freq1, word_freq2)
         labels.append(label.detach().cpu())
         preds.append(pred.detach().cpu())
     labels = torch.cat(labels)
