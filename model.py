@@ -200,7 +200,6 @@ class Model(nn.Module):
         capsule_masked = capsule_masked.sum(dim=1)
 
         reconstruction_output = F.relu(self.reconstruction_layer_1(capsule_masked))
-        # reconstruction_output = F.relu(self.reconstruction_layer_2(reconstruction_output))
         reconstruction_output = torch.sigmoid(self.reconstruction_layer_2(reconstruction_output))
 
         neg_indicator = torch.where(reconstructs < 1e-5, torch.ones(reconstructs.shape, device=self.device),
