@@ -107,8 +107,7 @@ class Model(nn.Module):
 
     def _init_reconstruction_layers(self, args):
         self.reconstruction_layer_1 = nn.Linear(args.graph_embedding_size, int((self.gcn_input_dim * 2) / 3))
-        # self.reconstruction_layer_2 = nn.Linear(int((self.gcn_input_dim * 2) / 3), int((self.gcn_input_dim * 3) / 2))
-        self.reconstruction_layer_3 = nn.Linear(int((self.gcn_input_dim * 2) / 3), self.recon_dim)
+        self.reconstruction_layer_2 = nn.Linear(int((self.gcn_input_dim * 2) / 3), self.recon_dim)
 
     def get_pos_enc(self, positions_ls):
         positions_tmp = []
@@ -202,7 +201,7 @@ class Model(nn.Module):
 
         reconstruction_output = F.relu(self.reconstruction_layer_1(capsule_masked))
         # reconstruction_output = F.relu(self.reconstruction_layer_2(reconstruction_output))
-        reconstruction_output = torch.sigmoid(self.reconstruction_layer_3(reconstruction_output))
+        reconstruction_output = torch.sigmoid(self.reconstruction_layer_2(reconstruction_output))
 
         neg_indicator = torch.where(reconstructs < 1e-5, torch.ones(reconstructs.shape, device=self.device),
                                     torch.zeros(reconstructs.shape, device=self.device))
