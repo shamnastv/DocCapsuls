@@ -138,6 +138,7 @@ class Model(nn.Module):
         #     features.append(feat)
 
         features = self.word_embeddings(node_inputs) + self.eps * positions
+        features = self.dropout(features)
         features = features * masks
         number_of_nodes = torch.sum(masks, dim=1, keepdim=True).float().unsqueeze(-1)
 
