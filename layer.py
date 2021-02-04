@@ -2,12 +2,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-"""
-ref
-https://github.com/timomernick/pytorch-capsule
-"""
-class SecondaryCapsuleLayer(nn.Module):
 
+class SecondaryCapsuleLayer(nn.Module):
+    """
+    ref https://github.com/timomernick/pytorch-capsule
+    """
     def __init__(self, in_channels, in_dim, out_channels, out_dim, device):
         super(SecondaryCapsuleLayer, self).__init__()
         self.device = device
