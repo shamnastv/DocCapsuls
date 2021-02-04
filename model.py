@@ -89,9 +89,6 @@ class Model(nn.Module):
     def _init_gcn(self, args):
         self.gcn_layers = nn.ModuleList()
         hidden_dim = args.node_embedding_size * args.num_gcn_channels
-        # self.gcn_layers.append(GCNConv(self.gcn_input_dim, hidden_dim))
-        # for _ in range(args.num_gcn_layers - 1):
-        #     self.gcn_layers.append(GCNConv(hidden_dim, hidden_dim))
 
         self.gcn_layers.append(GCN(self.gcn_input_dim, hidden_dim))
         for _ in range(args.num_gcn_layers - 1):
@@ -214,5 +211,4 @@ class Model(nn.Module):
         reconstruction_loss = torch.mean(pos_loss + neg_loss)
 
         loss = margin_loss + reconstruction_loss * args.reg_scale
-        # reconstruction_loss = torch.sum((reconstruction_output - reconstruction_output) ** 2)
         return loss, margin_loss, reconstruction_loss, pred
