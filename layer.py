@@ -2,21 +2,14 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-
+"""
+ref
+https://github.com/timomernick/pytorch-capsule
+"""
 class SecondaryCapsuleLayer(nn.Module):
-    """
-    Secondary Convolutional Capsule Layer class based on this repostory:
-    https://github.com/timomernick/pytorch-capsule
-    """
 
     def __init__(self, in_channels, in_dim, out_channels, out_dim, device):
         super(SecondaryCapsuleLayer, self).__init__()
-        """
-        :param in_units: Number of input units (GCN layers).
-        :param in_channels: Number of channels.
-        :param num_units: Number of capsules.
-        :param capsule_dimensions: Number of neurons in capsule.
-        """
         self.device = device
         self.in_dim = in_dim
         self.in_channels = in_channels
@@ -26,11 +19,6 @@ class SecondaryCapsuleLayer(nn.Module):
 
     @staticmethod
     def squash(s):
-        """
-        Squash activations.
-        :param s: Signal.
-        :return s: Activated signal.
-        """
         mag_sq = torch.sum(s ** 2, dim=3, keepdim=True)
         mag = torch.sqrt(mag_sq) + 1e-11
         a_j = mag_sq / (1.0 + mag_sq)
@@ -38,12 +26,6 @@ class SecondaryCapsuleLayer(nn.Module):
         return s, a_j
 
     def forward(self, x, number_of_nodes):
-        """
-        Forward propagation pass.
-        :param number_of_nodes:
-        :param x: Input features.
-        :return : Capsule output.
-        """
         input_shape = x.size()  # b x n x c x d
         batch_size = input_shape[0]
         n = input_shape[1]
@@ -72,14 +54,39 @@ class SecondaryCapsuleLayer(nn.Module):
         return v_j, a_j
 
 
+class GRUCellMod(nn.Module):
+    """
+    ref https://pytorch.org/docs/stable/generated/torch.nn.GRU.html
+    """
+    def __init__(self, input_dim, hidden_dim):
+        super(GRUCellMod, self).__init__()
+        self.W_ir = nn.Linear(input_dim, hidden_dim)
+        self.W_hr = nn.Linear(hidden_dim, hidden_dim)
+        self.W_in = nn.Linear(input_dim, hidden_dim)
+        self.W_hn = nn.Linear(hidden_dim, hidden_dim)
+        self.W_iz = nn.Linear(input_dim, hidden_dim)
+        self.W_hz = nn.Linear(hidden_dim, hidden_dim)
+
+    def forward(self, inp, ht_1):
+        r_t = torch.sigmoid(self.W_ir(inp) + self.W_hr(ht_1))
+        z_t = torch.sigmoid(self.W_iz(inp) + self.W_hz(ht_1))
+        n_t = F.tanh(self.W_in(inp) + r_t * self.W_hn(ht_1))
+        h_t = z_t * n_t + (1 - z_t) * inp
+        # h_t = z_t * inp + (1 - z_t) * ht_1
+        return h_t
+
+
 class GCN(torch.nn.Module):
     def __init__(self, input_dim, output_dim):
         super(GCN, self).__init__()
 
         self.linear1 = nn.Linear(input_dim, output_dim)
         self.eps = nn.Parameter(torch.randn(1), requires_grad=True)
+        self.gru = GRUCellMod(output_dim, output_dim)
 
     def forward(self, adj, x):
         h = self.linear1(x)
-        h = torch.bmm(adj, h) + self.eps * h
+        h1 = torch.bmm(adj, h)
+        h = self.gru(h, h1)
+
         return h

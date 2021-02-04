@@ -5,7 +5,6 @@ import numpy as np
 
 from attention import Attention
 from layer import SecondaryCapsuleLayer, GCN
-from util import normalize_adj
 
 epsilon = 1e-11
 
@@ -147,7 +146,8 @@ class Model(nn.Module):
         hidden_representations = []
         for layer in self.gcn_layers:
             features = layer(adj_norm, features)
-            features = F.leaky_relu(features) * masks
+            # features = F.leaky_relu(features)
+            features = features * masks
             # features = self.dropout(features)
             hidden_representations.append(features.reshape(b, n, c, -1))
 
@@ -170,15 +170,6 @@ class Model(nn.Module):
         return class_capsule_output, loss, margin_loss, reconstruction_loss, label, pred
 
     def calculate_loss(self, args, capsule_input, target, reconstructs):
-        """
-        Calculating the reconstruction loss of the model.
-        :param reconstructs:
-        :param target:
-        :param args:
-        :param capsule_input: Output of class capsule.
-        :param features: Feature matrix.
-        :return reconstrcution_loss: Loss of reconstruction.
-        """
 
         input_shape = capsule_input.shape
         batch_size = input_shape[0]
