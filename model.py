@@ -4,7 +4,7 @@ import torch.nn.functional as F
 import numpy as np
 
 from attention import Attention
-from layer import SecondaryCapsuleLayer, GCN
+from layer import CapsuleLayer, GCN
 
 epsilon = 1e-11
 
@@ -96,11 +96,11 @@ class Model(nn.Module):
 
     def _init_capsules(self, args):
 
-        self.graph_capsule = SecondaryCapsuleLayer(args.num_gcn_channels * args.num_gcn_layers,
-                                                   args.node_embedding_size, args.num_graph_capsules,
-                                                   args.graph_embedding_size, self.device)
-        self.class_capsule = SecondaryCapsuleLayer(args.num_graph_capsules, args.graph_embedding_size,
-                                                   self.num_classes, args.graph_embedding_size, self.device)
+        self.graph_capsule = CapsuleLayer(args.num_gcn_channels * args.num_gcn_layers,
+                                          args.node_embedding_size, args.num_graph_capsules,
+                                          args.graph_embedding_size, self.device)
+        self.class_capsule = CapsuleLayer(args.num_graph_capsules, args.graph_embedding_size,
+                                          self.num_classes, args.graph_embedding_size, self.device)
 
     def _init_reconstruction_layers(self, args):
         self.reconstruction_layer_1 = nn.Linear(args.graph_embedding_size, int((self.gcn_input_dim * 2) / 3))

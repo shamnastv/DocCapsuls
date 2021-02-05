@@ -3,12 +3,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-class SecondaryCapsuleLayer(nn.Module):
+class CapsuleLayer(nn.Module):
     """
     ref https://github.com/timomernick/pytorch-capsule
     """
     def __init__(self, in_channels, in_dim, out_channels, out_dim, device):
-        super(SecondaryCapsuleLayer, self).__init__()
+        super(CapsuleLayer, self).__init__()
         self.device = device
         self.in_dim = in_dim
         self.in_channels = in_channels
@@ -44,7 +44,7 @@ class SecondaryCapsuleLayer(nn.Module):
             # c_ij = torch.cat([c_ij] * batch_size, dim=0).unsqueeze(4)
             # print(number_of_nodes.shape)
             s_j = (c_ij * u_hat).sum(dim=1, keepdim=True)   # b x 1 x co x d
-            v_j, a_j = SecondaryCapsuleLayer.squash(s_j)  # b x 1 x co x d
+            v_j, a_j = CapsuleLayer.squash(s_j)  # b x 1 x co x d
 
             v_j1 = torch.cat([v_j] * n * self.in_channels, dim=1)  # b x n*ci x co x d
             u_vj1 = torch.sum(u_hat * v_j1, dim=3, keepdim=True)  # b x n*ci x co x 1
