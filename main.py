@@ -104,8 +104,8 @@ def create_gaph(args):
         lb = y[i]
         feat = feature_list[i]
         recon = [0] * vocab_size
-        for f in feat:
-            recon[f] += 1
+        for j, f in enumerate(feat):
+            recon[f] = word_freq_list[i][0][j] * word_freq_list[i][1][j]
         m_recon = max(recon)
         for f in range(len(recon)):
             recon[f] /= m_recon
