@@ -1,0 +1,259 @@
+Namespace(Attention=True, batch_size=16, configfile='R8', coordinate=False, decay_step=20000, device=0, epochs=400, graph_embedding_size=16, iterations=3, lambda_val=0.5, layer_depth=5, layer_width=2, lr=0.001, node_embedding_size=16, noise=0.3, num_gcn_channels=2, num_gcn_layers=4, num_graph_capsules=64, random_vec=False, reg_scale=0.1, seed=0)
+device :  cuda:0
+{'dataset': 'R8', 'window_size_g': 20, 'window_size': 3, 'save_graph': True, 'retrieve_graph': True, 'embed_type': 'global_pmi', 'pmi_c': 1}
+([1, 1, 1, 1, 1, 1, 1, 1], [3.637494829297367, 5.282154176694831, 6.308007111080512, 4.688097898779116, 7.547697998008527, 6.854550817448581, 4.002793895680197, 2.8243408175623563])
+total zero edge graphs :  0
+Model(
+  (word_embeddings): Embedding(7688, 400, padding_idx=0)
+  (attention): Attention(
+    (linears): ModuleList(
+      (0): Linear(in_features=130, out_features=12, bias=False)
+      (1): Linear(in_features=12, out_features=1, bias=False)
+    )
+  )
+  (gcn_layers): ModuleList(
+    (0): GCN(
+      (linear1): Linear(in_features=400, out_features=32, bias=True)
+    )
+    (1): GCN(
+      (linear1): Linear(in_features=32, out_features=32, bias=True)
+    )
+    (2): GCN(
+      (linear1): Linear(in_features=32, out_features=32, bias=True)
+    )
+    (3): GCN(
+      (linear1): Linear(in_features=32, out_features=32, bias=True)
+    )
+  )
+  (graph_capsule): SecondaryCapsuleLayer()
+  (class_capsule): SecondaryCapsuleLayer()
+  (reconstruction_layer_1): Linear(in_features=16, out_features=266, bias=True)
+  (reconstruction_layer_3): Linear(in_features=266, out_features=7688, bias=True)
+  (dropout): Dropout(p=0.3, inplace=False)
+)
+loss recon 168.52848714590073 margin : 108.86124540120363
+Epoch :  1 loss training:  125.7140941619873 Time :  108
+accuracy train: 0.737087 val: 0.766423 test: 0.754226
+max val : 0.7664233576642335 test : 0.7542256738236638 epoch : 1
+
+loss recon 160.11224389076233 margin : 59.67515692859888
+Epoch :  2 loss training:  75.6863816678524 Time :  491
+accuracy train: 0.776585 val: 0.808394 test: 0.793056
+max val : 0.8083941605839416 test : 0.7930561900411147 epoch : 2
+
+loss recon 157.77498525381088 margin : 51.14037897950038
+Epoch :  3 loss training:  66.91787767410278 Time :  1258
+accuracy train: 0.781851 val: 0.804745 test: 0.793970
+max val : 0.8083941605839416 test : 0.7930561900411147 epoch : 2
+
+loss recon 156.81369638442993 margin : 41.607779916375875
+Epoch :  4 loss training:  57.2891496270895 Time :  2352
+accuracy train: 0.820741 val: 0.843066 test: 0.828689
+max val : 0.843065693430657 test : 0.8286888990406578 epoch : 4
+
+loss recon 156.34905183315277 margin : 36.56921436591074
+Epoch :  5 loss training:  52.20411979407072 Time :  3467
+accuracy train: 0.801296 val: 0.824818 test: 0.813157
+max val : 0.843065693430657 test : 0.8286888990406578 epoch : 4
+
+loss recon 156.08118057250977 margin : 35.998812729958445
+Epoch :  6 loss training:  51.60693107545376 Time :  4532
+accuracy train: 0.861657 val: 0.864964 test: 0.874829
+max val : 0.864963503649635 test : 0.8748286888990406 epoch : 6
+
+loss recon 155.9068221449852 margin : 32.586819612421095
+Epoch :  7 loss training:  48.177502140402794 Time :  5595
+accuracy train: 0.876646 val: 0.881387 test: 0.878483
+max val : 0.8813868613138686 test : 0.8784833257195066 epoch : 7
+
+loss recon 156.0303369164467 margin : 28.361548190005124
+Epoch :  8 loss training:  43.96458204835653 Time :  6533
+accuracy train: 0.806158 val: 0.808394 test: 0.817268
+max val : 0.8813868613138686 test : 0.8784833257195066 epoch : 7
+
+loss recon 156.17756909132004 margin : 27.814871047070483
+Epoch :  9 loss training:  43.432628352195024 Time :  7464
+accuracy train: 0.903383 val: 0.897810 test: 0.914573
+max val : 0.8978102189781022 test : 0.914572864321608 epoch : 9
+
+loss recon 156.27077388763428 margin : 24.708746581469313
+Epoch :  10 loss training:  40.335824359208345 Time :  8422
+accuracy train: 0.914320 val: 0.908759 test: 0.923709
+max val : 0.9087591240875912 test : 0.9237094563727729 epoch : 10
+
+loss recon 156.2593725323677 margin : 31.169335650862195
+Epoch :  11 loss training:  46.79527309536934 Time :  9373
+accuracy train: 0.904395 val: 0.899635 test: 0.919598
+max val : 0.9087591240875912 test : 0.9237094563727729 epoch : 10
+
+loss recon 156.3145369887352 margin : 21.312242433530628
+Epoch :  12 loss training:  36.943696327507496 Time :  10280
+accuracy train: 0.905206 val: 0.903285 test: 0.916400
+max val : 0.9087591240875912 test : 0.9237094563727729 epoch : 10
+
+loss recon 156.30474466085434 margin : 26.670139867754187
+Epoch :  13 loss training:  42.30061449483037 Time :  11054
+accuracy train: 0.904193 val: 0.894161 test: 0.915943
+max val : 0.9087591240875912 test : 0.9237094563727729 epoch : 10
+
+loss recon 156.33753961324692 margin : 22.84385930246208
+Epoch :  14 loss training:  38.477613504976034 Time :  11653
+accuracy train: 0.908244 val: 0.908759 test: 0.920968
+max val : 0.9087591240875912 test : 0.9209684787574235 epoch : 14
+
+loss recon 156.32692724466324 margin : 20.535557868599426
+Epoch :  15 loss training:  36.16825091838837 Time :  12272
+accuracy train: 0.915941 val: 0.910584 test: 0.922796
+max val : 0.9105839416058394 test : 0.9227957971676565 epoch : 15
+
+loss recon 156.35599219799042 margin : 18.8966616235557
+Epoch :  16 loss training:  34.53226116299629 Time :  12908
+accuracy train: 0.916549 val: 0.910584 test: 0.915487
+max val : 0.9105839416058394 test : 0.9154865235267245 epoch : 16
+
+loss recon 156.41605639457703 margin : 28.43683830893133
+Epoch :  17 loss training:  44.07844419404864 Time :  13473
+accuracy train: 0.833502 val: 0.852190 test: 0.855642
+max val : 0.9105839416058394 test : 0.9154865235267245 epoch : 16
+
+loss recon 156.48133981227875 margin : 35.78412085212767
+Epoch :  18 loss training:  51.43225511163473 Time :  14026
+accuracy train: 0.879684 val: 0.877737 test: 0.899954
+max val : 0.9105839416058394 test : 0.9154865235267245 epoch : 16
+
+loss recon 156.5198768377304 margin : 29.36154965427704
+Epoch :  19 loss training:  45.01353758946061 Time :  14618
+accuracy train: 0.880292 val: 0.886861 test: 0.905893
+max val : 0.9105839416058394 test : 0.9154865235267245 epoch : 16
+
+loss recon 156.52134549617767 margin : 25.88845282746479
+Epoch :  20 loss training:  41.54058764874935 Time :  15241
+accuracy train: 0.888191 val: 0.885036 test: 0.904979
+max val : 0.9105839416058394 test : 0.9154865235267245 epoch : 16
+
+loss recon 156.51352387666702 margin : 24.855000681709498
+Epoch :  21 loss training:  40.50635322928429 Time :  15869
+accuracy train: 0.896091 val: 0.899635 test: 0.911832
+max val : 0.9105839416058394 test : 0.9154865235267245 epoch : 16
+
+loss recon 156.52751421928406 margin : 23.15971006435575
+Epoch :  22 loss training:  38.812461748719215 Time :  16481
+accuracy train: 0.870164 val: 0.874088 test: 0.888077
+max val : 0.9105839416058394 test : 0.9154865235267245 epoch : 16
+
+loss recon 156.48812979459763 margin : 24.14083452220075
+Epoch :  23 loss training:  39.7896478921175 Time :  17058
+accuracy train: 0.899534 val: 0.894161 test: 0.909548
+max val : 0.9105839416058394 test : 0.9154865235267245 epoch : 16
+
+loss recon 156.51713800430298 margin : 27.883866514690453
+Epoch :  24 loss training:  43.53558059036732 Time :  17661
+accuracy train: 0.879279 val: 0.866788 test: 0.888990
+max val : 0.9105839416058394 test : 0.9154865235267245 epoch : 16
+
+loss recon 156.51371544599533 margin : 26.31618842878379
+Epoch :  25 loss training:  41.96756024286151 Time :  18271
+accuracy train: 0.887786 val: 0.879562 test: 0.902695
+max val : 0.9105839416058394 test : 0.9154865235267245 epoch : 16
+
+loss recon 156.53575628995895 margin : 23.052980954307714
+Epoch :  26 loss training:  38.70655679702759 Time :  18874
+accuracy train: 0.911282 val: 0.901460 test: 0.916857
+max val : 0.9105839416058394 test : 0.9154865235267245 epoch : 16
+
+loss recon 156.5168061852455 margin : 21.623938388423994
+Epoch :  27 loss training:  37.275619242340326 Time :  19456
+accuracy train: 0.911890 val: 0.901460 test: 0.915943
+max val : 0.9105839416058394 test : 0.9154865235267245 epoch : 16
+
+loss recon 156.58400636911392 margin : 20.32671159406891
+Epoch :  28 loss training:  35.985112413764 Time :  19996
+accuracy train: 0.915941 val: 0.906934 test: 0.925080
+max val : 0.9105839416058394 test : 0.9154865235267245 epoch : 16
+
+loss recon 156.61517322063446 margin : 19.04488771792967
+Epoch :  29 loss training:  34.70640533417463 Time :  20547
+accuracy train: 0.921410 val: 0.906934 test: 0.923709
+max val : 0.9105839416058394 test : 0.9154865235267245 epoch : 16
+
+loss recon 156.62785482406616 margin : 19.35818305776047
+Epoch :  30 loss training:  35.02096874639392 Time :  21162
+accuracy train: 0.925461 val: 0.912409 test: 0.931019
+max val : 0.9124087591240876 test : 0.9310187300137049 epoch : 30
+
+loss recon 156.64883893728256 margin : 19.319386862916872
+Epoch :  31 loss training:  34.98427102714777 Time :  21746
+accuracy train: 0.917966 val: 0.894161 test: 0.920512
+max val : 0.9124087591240876 test : 0.9310187300137049 epoch : 30
+
+loss recon 156.643574655056 margin : 22.09404843277298
+Epoch :  32 loss training:  37.75840622186661 Time :  22298
+accuracy train: 0.886368 val: 0.886861 test: 0.891275
+max val : 0.9124087591240876 test : 0.9310187300137049 epoch : 30
+
+loss recon 156.61409783363342 margin : 24.84401715826243
+Epoch :  33 loss training:  40.5054271183908 Time :  22860
+accuracy train: 0.900547 val: 0.905109 test: 0.898584
+max val : 0.9124087591240876 test : 0.9310187300137049 epoch : 30
+
+loss recon 156.65487450361252 margin : 24.21027417399455
+Epoch :  34 loss training:  39.87576177716255 Time :  23443
+accuracy train: 0.881912 val: 0.885036 test: 0.882595
+max val : 0.9124087591240876 test : 0.9310187300137049 epoch : 30
+
+loss recon 156.6297218799591 margin : 25.069497428950854
+Epoch :  35 loss training:  40.73246989399195 Time :  24080
+accuracy train: 0.895888 val: 0.892336 test: 0.897670
+max val : 0.9124087591240876 test : 0.9310187300137049 epoch : 30
+
+loss recon 156.66762936115265 margin : 21.684016437793616
+Epoch :  36 loss training:  37.350779589265585 Time :  24686
+accuracy train: 0.920600 val: 0.916058 test: 0.916857
+max val : 0.916058394160584 test : 0.9168570123343993 epoch : 36
+
+loss recon 156.67435055971146 margin : 19.984639355745458
+Epoch :  37 loss training:  35.65207466110587 Time :  25247
+accuracy train: 0.887786 val: 0.879562 test: 0.899041
+max val : 0.916058394160584 test : 0.9168570123343993 epoch : 36
+
+loss recon 156.7063366174698 margin : 25.544555777218193
+Epoch :  38 loss training:  41.21518975868821 Time :  25807
+accuracy train: 0.912903 val: 0.901460 test: 0.925080
+max val : 0.916058394160584 test : 0.9168570123343993 epoch : 36
+
+loss recon 156.7179279923439 margin : 20.323223595849413
+Epoch :  39 loss training:  35.99501658976078 Time :  26388
+accuracy train: 0.916751 val: 0.899635 test: 0.922339
+max val : 0.916058394160584 test : 0.9168570123343993 epoch : 36
+
+loss recon 156.78189677000046 margin : 19.710862578707747
+Epoch :  40 loss training:  35.389052499085665 Time :  27010
+accuracy train: 0.925663 val: 0.914234 test: 0.925080
+max val : 0.916058394160584 test : 0.9168570123343993 epoch : 36
+
+loss recon 156.80115240812302 margin : 17.945699266449083
+Epoch :  41 loss training:  33.62581481784582 Time :  27625
+accuracy train: 0.921612 val: 0.908759 test: 0.922339
+max val : 0.916058394160584 test : 0.9168570123343993 epoch : 36
+
+loss recon 156.83898454904556 margin : 19.85299722815398
+Epoch :  42 loss training:  35.53689585253596 Time :  28164
+accuracy train: 0.922828 val: 0.910584 test: 0.921425
+max val : 0.916058394160584 test : 0.9168570123343993 epoch : 36
+
+loss recon 156.84720408916473 margin : 20.729466561577283
+Epoch :  43 loss training:  36.414187259972095 Time :  28720
+accuracy train: 0.912903 val: 0.912409 test: 0.908177
+max val : 0.916058394160584 test : 0.9168570123343993 epoch : 36
+
+loss recon 156.87475097179413 margin : 20.606722152093425
+Epoch :  44 loss training:  36.29419745504856 Time :  29323
+accuracy train: 0.886166 val: 0.881387 test: 0.881681
+max val : 0.916058394160584 test : 0.9168570123343993 epoch : 36
+
+loss recon 156.83794385194778 margin : 21.115884268496302
+Epoch :  45 loss training:  36.79967888817191 Time :  30079
+accuracy train: 0.926676 val: 0.914234 test: 0.925537
+max val : 0.916058394160584 test : 0.9168570123343993 epoch : 36
+
+slurmstepd: error: *** JOB 24155 ON cl-gpusrv2 CANCELLED AT 2021-02-04T08:30:13 ***
